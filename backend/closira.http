@@ -1,0 +1,167 @@
+### Closira API — HTTP Test File
+### Compatible with the VS Code REST Client extension (humao.rest-client)
+### Install: https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+@baseUrl = http://localhost:8000
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 1 — Submit a new inbound WhatsApp enquiry about pricing
+# Expected: 202 Accepted | { enquiry_id, status: "open", message }
+# ─────────────────────────────────────────────────────────────────────────────
+
+# @name submitEnquiry
+POST {{baseUrl}}/enquiry
+Content-Type: application/json
+
+{
+  "customer_name": "Sarah Mitchell",
+  "channel": "whatsapp",
+  "message": "Hi, I wanted to know about your pricing plans for small businesses"
+}
+
+###
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 2 — Submit a complaint via email (will trigger auto-escalation if
+#           background task runs before this comment is reached)
+# Expected: 202 Accepted
+# ─────────────────────────────────────────────────────────────────────────────
+
+POST {{baseUrl}}/enquiry
+Content-Type: application/json
+
+{
+  "customer_name": "James O'Brien",
+  "channel": "email",
+  "message": "I am really disappointed with the service. I want a refund immediately."
+}
+
+###
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 3 — Submit a booking enquiry via phone
+# Expected: 202 Accepted | background task should match "Booking Enquiry" SOP
+# ─────────────────────────────────────────────────────────────────────────────
+
+POST {{baseUrl}}/enquiry
+Content-Type: application/json
+
+{
+  "customer_name": "Priya Sharma",
+  "channel": "call",
+  "message": "Hi, I'd like to book an appointment for next Tuesday morning if possible"
+}
+
+###
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 4 — Schedule a follow-up on Sarah's enquiry
+# Replace <enquiry_id> with the enquiry_id from STEP 1's response
+# Expected: 201 Created | followup record with scheduled_at
+# ─────────────────────────────────────────────────────────────────────────────
+
+@sarahEnquiryId = <enquiry_id>
+
+POST {{baseUrl}}/enquiry/{{sarahEnquiryId}}/followup
+Content-Type: application/json
+
+{
+  "delay_minutes": 30,
+  "message_template": "Hi {customer_name}, just following up on your pricing enquiry. Let us know if you have any questions!"
+}
+
+###
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 5 — Schedule a follow-up using the default template (no message_template)
+# Expected: 201 Created | message_template populated with system default
+# ─────────────────────────────────────────────────────────────────────────────
+
+POST {{baseUrl}}/enquiry/{{sarahEnquiryId}}/followup
+Content-Type: application/json
+
+{
+  "delay_minutes": 60
+}
+
+###
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 6 — Manually escalate Sarah's enquiry
+# Expected: 200 OK | status: "escalated", escalation_reason populated
+# ─────────────────────────────────────────────────────────────────────────────
+
+POST {{baseUrl}}/enquiry/{{sarahEnquiryId}}/escalate
+Content-Type: application/json
+
+{
+  "reason": "Customer called back frustrated — escalating to senior support for immediate callback"
+}
+
+###
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 7 — Attempt to escalate again (should fail with 409 Conflict)
+# Expected: 409 Conflict | error: "enquiry_already_escalated"
+# ─────────────────────────────────────────────────────────────────────────────
+
+POST {{baseUrl}}/enquiry/{{sarahEnquiryId}}/escalate
+Content-Type: application/json
+
+{
+  "reason": "Trying to escalate again"
+}
+
+###
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 8 — Retrieve full history for Sarah's enquiry
+# Expected: 200 OK | enquiry + timeline (enquiry_created, followup_scheduled x2,
+#           escalated) + followups list
+# ─────────────────────────────────────────────────────────────────────────────
+
+GET {{baseUrl}}/enquiry/{{sarahEnquiryId}}/history
+
+###
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 9 — History for a non-existent enquiry
+# Expected: 404 Not Found | error: "enquiry_not_found"
+# ─────────────────────────────────────────────────────────────────────────────
+
+GET {{baseUrl}}/enquiry/00000000-0000-0000-0000-000000000000/history
+
+###
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STEP 10 — Health check
+# Expected: 200 OK | { status: "ok", database: "connected", timestamp }
+# ─────────────────────────────────────────────────────────────────────────────
+
+GET {{baseUrl}}/health
+
+###
+
+# ─────────────────────────────────────────────────────────────────────────────
+# EDGE CASES
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Invalid channel — should return 422 with validation_error
+POST {{baseUrl}}/enquiry
+Content-Type: application/json
+
+{
+  "customer_name": "Test User",
+  "channel": "telegram",
+  "message": "Hello from Telegram"
+}
+
+###
+
+# Followup on non-existent enquiry — should return 404
+POST {{baseUrl}}/enquiry/not-a-real-id/followup
+Content-Type: application/json
+
+{
+  "delay_minutes": 30
+}
