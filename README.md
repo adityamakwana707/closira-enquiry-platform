@@ -452,7 +452,7 @@ Note: BlurView effects are limited on web. The app is optimised for native iOS a
 
 ### Demo Video
 <div align="center">
-  <video src="./frontend/assets/images/demo.mp4" controls="controls" muted="muted" height="500"></video>
+  <video src="./frontend/assets/images/demovideo.mp4" controls="controls" muted="muted" height="500"></video>
 </div>
 
 ## Frontend — Screen Reference
