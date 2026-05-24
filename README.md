@@ -440,19 +440,20 @@ npx expo start --web
 Note: BlurView effects are limited on web. The app is optimised for native iOS and Android.
 
 
-## Frontend — Screenshots`
+## Frontend — Screenshots
 
-### Dashboard
-![Dashboard](./frontend/assets/images/homepage.jpeg) 
-
-### Leads Management
-![Leads](./frontend/assets/images/leads.jpeg) 
-
-### Conversation Detail
-![Conversation](./frontend/assets/images/chat.jpeg) 
+<div align="center">
+  <img src="./frontend/assets/images/homepage.jpeg" width="250" alt="Dashboard" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="./frontend/assets/images/leads.jpeg" width="250" alt="Leads Management" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="./frontend/assets/images/chat.jpeg" width="250" alt="Conversation Detail" />
+</div>
 
 ### Demo Video
-<video src="./frontend/assets/images/demo.mp4" controls="controls" muted="muted" style="max-height:640px;"></video>
+<div align="center">
+  <video src="./frontend/assets/images/demo.mp4" controls="controls" muted="muted" height="500"></video>
+</div>
 
 ## Frontend — Screen Reference
 
