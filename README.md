@@ -451,9 +451,8 @@ Note: BlurView effects are limited on web. The app is optimised for native iOS a
 </div>
 
 ### Demo Video
-<div align="center">
-  <video src="./frontend/assets/images/demovideo.mp4" controls="controls" muted="muted" height="500"></video>
-</div>
+https://github.com/adityamakwana707/closira-enquiry-platform/raw/main/frontend/assets/images/demovideo.mp4
+
 
 ## Frontend — Screen Reference
 
